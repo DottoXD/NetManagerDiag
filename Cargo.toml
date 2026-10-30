@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/diag-model",
+    "crates/diag-qualcomm",
+    "crates/diag-mediatek",
+    "crates/diag-samsung",
+    "crates/netmanager-diag",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.75"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/DottoXD/NetManagerDiag"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+pedantic = { level = "warn", priority = -1 }
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
+panic = "abort"

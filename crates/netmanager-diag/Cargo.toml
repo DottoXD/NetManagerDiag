@@ -1,0 +1,19 @@
+[package]
+name = "netmanager-diag"
+description = "A Rust library that talks to baseband diagnostic interfaces and records/streams events, made for NetManager."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+diag-model = { path = "../diag-model" }
+diag-qualcomm = { path = "../diag-qualcomm" }
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "NetManagerDiag"
+path = "src/main.rs"
