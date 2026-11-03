@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#![forbid(unsafe_code)]
+
 use std::io;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
