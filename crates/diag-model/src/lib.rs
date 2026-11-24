@@ -30,7 +30,6 @@ pub struct LteServingMeas {
     pub earfcn: u32,
     pub pci: u16,
     pub rsrp_dbm: f32,
-    pub avg_rsrp_dbm: f32,
     pub rsrq_db: f32,
     pub rssi_dbm: f32,
 }
@@ -107,6 +106,57 @@ pub struct LteBearer {
     pub apn_ambr_ul_kbps: Option<u64>,
 }
 
+/// Serving UMTS cell identity (Qualcomm: 0x4127).
+#[derive(Clone, Debug, PartialEq)]
+pub struct UmtsCellInfo {
+    pub slot: Option<u8>,
+    pub timestamp: u64,
+    pub uarfcn_dl: u32,
+    pub uarfcn_ul: u32,
+    pub psc: u16,
+    /// 28 bits.
+    pub cell_id: u32,
+    pub lac: u16,
+    pub mcc: u16,
+    pub mnc: u16,
+    /// 2 or 3 digits.
+    pub mnc_digits: u8,
+}
+
+/// Serving UMTS cell signal (Qualcomm: 0x4005).
+#[derive(Clone, Debug, PartialEq)]
+pub struct UmtsServingMeas {
+    pub slot: Option<u8>,
+    pub timestamp: u64,
+    pub uarfcn: u16,
+    pub psc: u16,
+    pub rscp_dbm: i16,
+    pub ecio_db: i16,
+}
+
+/// Serving GSM cell identity (Qualcomm: 0x5134).
+#[derive(Clone, Debug, PartialEq)]
+pub struct GsmCellInfo {
+    pub slot: Option<u8>,
+    pub timestamp: u64,
+    pub arfcn: u16,
+    pub bsic: u8,
+    pub cell_id: u16,
+    pub lac: u16,
+    pub mcc: u16,
+    pub mnc: u16,
+    /// 2 or 3 digits.
+    pub mnc_digits: u8,
+}
+
+/// Serving GSM cell signal (Qualcomm: 0x507A).
+#[derive(Clone, Debug, PartialEq)]
+pub struct GsmServingMeas {
+    pub slot: Option<u8>,
+    pub timestamp: u64,
+    pub rssi_dbm: f32,
+}
+
 /// What a client wants to receive. Clients ask for features, never for vendor log identifiers.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
@@ -114,10 +164,18 @@ pub enum Feature {
     LteServingCell,
     NrCellTable,
     LteBearers,
+    GsmServingCell,
+    UmtsServingCell,
 }
 
 impl Feature {
-    pub const ALL: &'static [Feature] = &[Feature::LteServingCell, Feature::NrCellTable, Feature::LteBearers];
+    pub const ALL: &'static [Feature] = &[
+        Feature::LteServingCell,
+        Feature::NrCellTable,
+        Feature::LteBearers,
+        Feature::GsmServingCell,
+        Feature::UmtsServingCell,
+    ];
 
     /// Daemon clients protocol names.
     pub fn name(self) -> &'static str {
@@ -125,6 +183,8 @@ impl Feature {
             Feature::LteServingCell => "lte_serving_cell",
             Feature::NrCellTable => "nr_cell_table",
             Feature::LteBearers => "lte_bearers",
+            Feature::GsmServingCell => "gsm_serving_cell",
+            Feature::UmtsServingCell => "umts_serving_cell",
         }
     }
 
@@ -142,6 +202,10 @@ pub enum Event {
     LteCellInfo(LteCellInfo),
     NrMeasurements(NrMeasurements),
     LteBearer(LteBearer),
+    UmtsCellInfo(UmtsCellInfo),
+    UmtsServingMeas(UmtsServingMeas),
+    GsmCellInfo(GsmCellInfo),
+    GsmServingMeas(GsmServingMeas),
 }
 
 impl Event {
@@ -150,6 +214,8 @@ impl Event {
             Event::LteServingMeas(_) | Event::LteCellInfo(_) => Some(Feature::LteServingCell),
             Event::NrMeasurements(_) => Some(Feature::NrCellTable),
             Event::LteBearer(_) => Some(Feature::LteBearers),
+            Event::UmtsCellInfo(_) | Event::UmtsServingMeas(_) => Some(Feature::UmtsServingCell),
+            Event::GsmCellInfo(_) | Event::GsmServingMeas(_) => Some(Feature::GsmServingCell),
             _ => None,
         }
     }
